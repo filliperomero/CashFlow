@@ -2,5 +2,5 @@
 
 public interface IUnitOfWork
 {
-    public void Commit();
+    Task Commit();
 }

@@ -1,21 +1,20 @@
 ﻿using AutoMapper;
 using CashFlow.Communication.Requests;
-using CashFlow.Communication.Responses;
-using CashFlow.Domain.Entities;
 using CashFlow.Domain.Repositories;
 using CashFlow.Domain.Repositories.Expenses;
+using CashFlow.Exception;
 using CashFlow.Exception.ExceptionsBase;
 
-namespace CashFlow.Application.UseCases.Expenses.Register;
+namespace CashFlow.Application.UseCases.Expenses.Update;
 
-public class RegisterExpenseUseCase : IRegisterExpenseUseCase
+public class UpdateExpenseUseCase : IUpdateExpenseUseCase
 {
-    private readonly IExpensesWriteOnlyRepository _expensesRepository;
+    private readonly IExpensesUpdateOnlyRepository _expensesRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public RegisterExpenseUseCase(
-        IExpensesWriteOnlyRepository expensesRepository, 
+    public UpdateExpenseUseCase(
+        IExpensesUpdateOnlyRepository expensesRepository,
         IUnitOfWork unitOfWork,
         IMapper mapper)
     {
@@ -24,17 +23,22 @@ public class RegisterExpenseUseCase : IRegisterExpenseUseCase
         _mapper = mapper;
     }
 
-    public async Task<ResponseRegisterExpenseJson> Execute(RequestExpenseJson request)
+    public async Task Execute(long id, RequestExpenseJson request)
     {
         Validate(request);
 
-        var entity = _mapper.Map<Expense>(request);
+        var expense = await _expensesRepository.GetById(id);
 
-        await _expensesRepository.Add(entity);
+        if (expense is null)
+        {
+            throw new NotFoundException(ResourceErrorMessages.EXPENSE_NOT_FOUND);
+        }
+
+        _mapper.Map(request, expense);
+
+        _expensesRepository.Update(expense);
 
         await _unitOfWork.Commit();
-
-        return _mapper.Map<ResponseRegisterExpenseJson>(entity);
     }
 
     private void Validate(RequestExpenseJson request)
@@ -42,7 +46,7 @@ public class RegisterExpenseUseCase : IRegisterExpenseUseCase
         var validator = new ExpenseValidator();
 
         var result = validator.Validate(request);
-  
+
         if (result.IsValid) return;
 
         var errorMessages = result.Errors.Select(f => f.ErrorMessage).ToList();

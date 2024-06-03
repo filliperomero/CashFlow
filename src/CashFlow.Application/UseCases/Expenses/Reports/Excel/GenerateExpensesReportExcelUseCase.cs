@@ -6,12 +6,12 @@ using CashFlow.Domain.Enums;
 
 namespace CashFlow.Application.UseCases.Expenses.Reports.Excel;
 
-public class GenerateExpensesExcelUseCase : IGenerateExpensesExcelUseCase
+public class GenerateExpensesReportExcelUseCase : IGenerateExpensesReportExcelUseCase
 {
     private const string CURRENCY_SYMBOL = "$";
     private readonly IExpensesReadOnlyRepository _repository;
 
-    public GenerateExpensesExcelUseCase(IExpensesReadOnlyRepository repository)
+    public GenerateExpensesReportExcelUseCase(IExpensesReadOnlyRepository repository)
     {
         _repository = repository;
     }

@@ -30,6 +30,6 @@ public static class DependencyInjectionExtension
         services.AddScoped<IUpdateExpenseUseCase, UpdateExpenseUseCase>();
 
         // Reports
-        services.AddScoped<IGenerateExpensesExcelUseCase, GenerateExpensesExcelUseCase>();
+        services.AddScoped<IGenerateExpensesReportExcelUseCase, GenerateExpensesReportExcelUseCase>();
     }
 }

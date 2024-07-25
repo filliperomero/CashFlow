@@ -94,3 +94,6 @@ async Task MigrateDatabase()
     await using var scope = app.Services.CreateAsyncScope();
     await DatabaseMigration.MigrateDatabase(scope.ServiceProvider);
 }
+
+// This is necessary for E2E Tests
+public partial class Program { }

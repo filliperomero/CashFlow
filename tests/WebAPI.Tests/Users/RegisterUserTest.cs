@@ -6,6 +6,7 @@ using System.Text.Json;
 using CashFlow.Exception;
 using CommonTestUtilities.Requests;
 using FluentAssertions;
+using WebAPI.Test.InlineData;
 
 namespace WebAPI.Test.Users;
 
@@ -38,8 +39,7 @@ public class RegisterUserTest : IClassFixture<CustomWebApplicationFactory>
     }
     
     [Theory]
-    [InlineData("pt-BR")]
-    [InlineData("en")]
+    [ClassData(typeof(CultureInlineDataTest))]
     public async Task Error_Empty_Name(string cultureInfo)
     {
         var request = RequestRegisterUserJsonBuilder.Build();

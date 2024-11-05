@@ -10,16 +10,14 @@ using WebAPI.Test.InlineData;
 
 namespace WebAPI.Test.Expenses.Register;
 
-public class RegisterExpenseTest : IClassFixture<CustomWebApplicationFactory>
+public class RegisterExpenseTest : CashFlowClassFixture
 {
     private const string USER_URI = "api/Expenses";
     
-    private readonly HttpClient _httpClient;
     private readonly string _token;
 
-    public RegisterExpenseTest(CustomWebApplicationFactory webApplicationFactory)
+    public RegisterExpenseTest(CustomWebApplicationFactory webApplicationFactory) : base(webApplicationFactory)
     {
-        _httpClient = webApplicationFactory.CreateClient();
         _token = webApplicationFactory.GetToken();
     }
 
@@ -27,10 +25,8 @@ public class RegisterExpenseTest : IClassFixture<CustomWebApplicationFactory>
     public async Task Success()
     {
         var request = RequestRegisterExpenseJsonBuilder.Build();
-        
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
 
-        var result = await _httpClient.PostAsJsonAsync(USER_URI, request);
+        var result = await PostAsync(requestUri: USER_URI, request: request, token: _token);
 
         result.StatusCode.Should().Be(HttpStatusCode.Created);
         
@@ -48,10 +44,7 @@ public class RegisterExpenseTest : IClassFixture<CustomWebApplicationFactory>
         var request = RequestRegisterExpenseJsonBuilder.Build();
         request.Title = string.Empty;
 
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
-        _httpClient.DefaultRequestHeaders.AcceptLanguage.Add(new StringWithQualityHeaderValue(cultureInfo));
-
-        var result = await _httpClient.PostAsJsonAsync(USER_URI, request);
+        var result = await PostAsync(requestUri: USER_URI, request: request, token: _token, culture: cultureInfo);
 
         result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         

@@ -11,17 +11,15 @@ using WebAPI.Test.InlineData;
 
 namespace WebAPI.Test.Login;
 
-public class LoginTest : IClassFixture<CustomWebApplicationFactory>
+public class LoginTest : CashFlowClassFixture
 {
     private const string METHOD = "api/auth";
-    private readonly HttpClient _httpClient;
     private readonly string _email;
     private readonly string _name;
     private readonly string _password;
 
-    public LoginTest(CustomWebApplicationFactory webApplicationFactory)
+    public LoginTest(CustomWebApplicationFactory webApplicationFactory) : base(webApplicationFactory)
     {
-        _httpClient = webApplicationFactory.CreateClient();
         _email = webApplicationFactory.GetEmail();
         _name = webApplicationFactory.GetName();
         _password = webApplicationFactory.GetPassword();
@@ -32,7 +30,7 @@ public class LoginTest : IClassFixture<CustomWebApplicationFactory>
     {
         var request = new RequestLoginJson() { Email = _email, Password = _password };
 
-        var response = await _httpClient.PostAsJsonAsync(METHOD, request);
+        var response = await PostAsync(METHOD, request);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         
@@ -48,10 +46,8 @@ public class LoginTest : IClassFixture<CustomWebApplicationFactory>
     public async Task Error_Login_Invali(string cultureInfo)
     {
         var request = RequestLoginJsonBuilder.Build();
-        
-        _httpClient.DefaultRequestHeaders.AcceptLanguage.Add(new StringWithQualityHeaderValue(cultureInfo));
 
-        var result = await _httpClient.PostAsJsonAsync(METHOD, request);
+        var result = await PostAsync(requestUri: METHOD, request: request, culture: cultureInfo);
 
         result.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         

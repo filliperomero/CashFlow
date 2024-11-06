@@ -58,5 +58,4 @@ public class RegisterExpenseTest : CashFlowClassFixture
 
         errors.Should().HaveCount(1).And.Contain(error => error.GetString()!.Equals(expectedMessage));
     }
-
 }

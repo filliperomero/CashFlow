@@ -17,9 +17,15 @@ public class CashFlowClassFixture : IClassFixture<CustomWebApplicationFactory>
         AuthorizeRequest(token);
         ChangeRequestCulture(culture);
         
-        var result = await _httpClient.PostAsJsonAsync(requestUri, request);
-
-        return result;
+        return await _httpClient.PostAsJsonAsync(requestUri, request);
+    }
+    
+    protected async Task<HttpResponseMessage> GetAsync(string requestUri, string token = "", string culture = "en")
+    {
+        AuthorizeRequest(token);
+        ChangeRequestCulture(culture);
+        
+        return await _httpClient.GetAsync(requestUri);
     }
 
     private void AuthorizeRequest(string token)

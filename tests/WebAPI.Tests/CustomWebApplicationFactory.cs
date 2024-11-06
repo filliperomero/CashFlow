@@ -1,4 +1,5 @@
-﻿using CashFlow.Domain.Security.Cryptography;
+﻿using CashFlow.Domain.Entities;
+using CashFlow.Domain.Security.Cryptography;
 using CashFlow.Domain.Security.Tokens;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -11,7 +12,7 @@ namespace WebAPI.Test;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
-    private CashFlow.Domain.Entities.User _user;
+    private User _user;
     private string _password;
     private string _token;
     
@@ -47,12 +48,25 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     
     private void StartDatabase(CashFlowDbContext dbContext, IPasswordEncrypter passwordEncrypter)
     {
+        AddUsers(dbContext, passwordEncrypter);
+        AddExpenses(dbContext, _user);
+
+        dbContext.SaveChanges();
+    }
+
+    private void AddUsers(CashFlowDbContext dbContext, IPasswordEncrypter passwordEncrypter)
+    {
         _user = UserBuilder.Builder();
         _password = _user.Password;
         _user.Password = passwordEncrypter.Encrypt(_user.Password);
         
         dbContext.Users.Add(_user);
+    }
 
-        dbContext.SaveChanges();
+    private void AddExpenses(CashFlowDbContext dbContext, User user)
+    {
+        var expense = ExpenseBuilder.Build(user);
+
+        dbContext.Expenses.Add(expense);
     }
 }

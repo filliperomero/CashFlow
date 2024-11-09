@@ -28,5 +28,12 @@ public class ExpensesReadOnlyRepositoryBuilder
         return this;
     }
     
+    public ExpensesReadOnlyRepositoryBuilder FilterByMonthAndYear(User user, List<Expense> expenses)
+    {
+        _repository.Setup(repository => repository.FilterByMonthAndYear(user, It.IsAny<DateOnly>())).ReturnsAsync(expenses);
+
+        return this;
+    }
+    
     public IExpensesReadOnlyRepository Build() => _repository.Object;
 }

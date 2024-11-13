@@ -28,7 +28,8 @@ public class AutoMapping : Profile
     {
         CreateMap<Expense, ResponseRegisterExpenseJson>();
         CreateMap<Expense, ResponseShortExpenseJson>();
-        CreateMap<Expense, ResponseExpenseJson>();
+        CreateMap<Expense, ResponseExpenseJson>()
+            .ForMember(dest => dest.Tags, config => config.MapFrom(source => source.Tags.Select(tag => tag.Value)));
         CreateMap<User, ResponseUserProfileJson>();
     }
 }

@@ -1,6 +1,7 @@
 ﻿using CashFlow.Domain.Entities;
 using CashFlow.Domain.Repositories.Expenses;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace CashFlow.Infrastructure.DataAccess.Repositories;
 
@@ -20,12 +21,16 @@ internal class ExpensesRepository : IExpensesReadOnlyRepository, IExpensesWriteO
 
     public async Task<List<Expense>> GetAll(User user)
     {
-        return await _dbContext.Expenses.AsNoTracking().Where(e => e.UserId == user.Id).ToListAsync();
+        return await GetFullExpense()
+            .AsNoTracking()
+            .Where(e => e.UserId == user.Id).ToListAsync();
     }
 
     async Task<Expense?> IExpensesReadOnlyRepository.GetById(User user, long id)
     {
-        var expense = await _dbContext.Expenses.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id && e.UserId == user.Id);
+        var expense = await GetFullExpense()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == user.Id);
 
         return expense;
     }
@@ -39,7 +44,7 @@ internal class ExpensesRepository : IExpensesReadOnlyRepository, IExpensesWriteO
 
     async Task<Expense?> IExpensesUpdateOnlyRepository.GetById(User user, long id)
     {
-        var expense = await _dbContext.Expenses.FirstOrDefaultAsync(e => e.Id == id && e.UserId == user.Id);
+        var expense = await GetFullExpense().FirstOrDefaultAsync(e => e.Id == id && e.UserId == user.Id);
 
         return expense;
     }
@@ -56,11 +61,16 @@ internal class ExpensesRepository : IExpensesReadOnlyRepository, IExpensesWriteO
         var daysInMonth = DateTime.DaysInMonth(year: date.Year, month: date.Month);
         var endDate = new DateTime(year: date.Year, month: date.Month, day: daysInMonth, hour: 23, minute: 59, second: 59);
 
-        return await _dbContext.Expenses
+        return await GetFullExpense()
             .AsNoTracking()
             .Where(expense => expense.Date >= startDate && expense.Date <= endDate && expense.UserId == user.Id)
             .OrderBy(expense => expense.Date)
             .ThenBy(expense => expense.Title) // If we have an expense with the same Date, then we will use the title to order
             .ToListAsync();
+    }
+
+    private IIncludableQueryable<Expense, ICollection<Tag>> GetFullExpense()
+    {
+        return _dbContext.Expenses.Include(expense => expense.Tags);
     }
 }
